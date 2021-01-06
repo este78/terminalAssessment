@@ -1,17 +1,18 @@
-import java.util.Random;  
+import java.util.Random;
 
 public class FCWGame {
     //var declaration
     //The Computer Words (no peeking!)
     String[] words ={"algorithm", "application", "backup", "bit", "buffer", "bandwidth", "broadband", "bug", "binary", "browser", "bus", "cache", "command", "computer", "cookie", "compiler", "cyberspace", "compress", "configure", "database", "digital", "data", "debug", "desktop", "disk", "domain", "decompress", "development", "download", "dynamic", "email", "encryption", "firewall", "flowchart", "file", "folder", "graphics", "hyperlink", "host", "hardware", "icon", "inbox", "internet", "kernel", "keyword", "keyboard", "laptop", "login", "logic", "malware", "motherboard", "mouse", "mainframe", "memory", "monitor", "multimedia", "network", "node", "offline", "online", "path", "process", "protocol", "password", "phishing", "platform", "program", "portal", "privacy", "programmer", "queue", "resolution", "root", "restore", "router", "reboot", "runtime", "screen", "security", "shell", "snapshot", "spam", "screenshot", "server", "script", "software", "spreadsheet", "storage", "syntax", "table", "template", "thread", "terminal", "username", "virtual", "virus", "web", "website", "window", "wireless"};
-    
+
     char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    char[] vowels = {'a','e','i','o','u'};
     char[] validLetters;
     String[] roundWords;
     String[] guessedWords;
     FCWPlayer p1;
     FCWPlayer p2;
-    Random random;  
+    Random random;
     //constructor
     public FCWGame(FCWPlayer p1,FCWPlayer p2){
         this.p1 = p1;
@@ -21,12 +22,16 @@ public class FCWGame {
         random = new Random();
     }
     //setters
-    //set the playing letters 
+    //set the playing letters
     public void setValidLetters(){
         int index;
         //use random to select letters from the alphabet array
         //assing the selected letter to the valid letters for the round
-        for(int i=0;i<validLetters.length;i++){
+        for(int i=0;i<2;i++){
+			index= random.nextInt(4);
+            validLetters[i]= vowels[index];
+		}
+        for(int i=2;i<validLetters.length;i++){
             index= random.nextInt(25);
             validLetters[i]= alphabet[index];
         }
@@ -55,30 +60,47 @@ public class FCWGame {
     }
     //computing
     //validation of player input
-    public boolean validateInput(FCWPlayer p){
+    public boolean isInputValid(FCWPlayer p){
+        //control array based on player input
         String input = p.getCurrentGuess();
+        char[] controlArray = new char [input.length()];
+        for(int i=0;i<input.length();i++){
+            controlArray[i]= input.charAt(i);
+        }
+
+        //control array based on the letters selected by the game
+        char[] tempLetters = validLetters.clone();
+        //boolean to be returned
+        boolean isValid = true;
+
         //accept null answers
         if(input.equals("")){
-            return true;
+            return isValid;
         }
+
         //do not accept already guessed words
         for(int i=0;i<guessedWords.length;i++){
             if(input.equals(guessedWords[i])){
-                return false;
-            }
-            else if(guessedWords[i].equals("")){
-                break;
+                return isValid = false;
             }
         }
-        for(int i=0;i<input.length();i++){
-            for(int j=0;i<validLetters.length;j++){
-                if(input.charAt(i)==validLetters[j]){
-                    return true;
+
+        //compare both control array with each other, delete any matched chars
+        for(int i=0;i<controlArray.length;i++){
+            for(int j=0;j<tempLetters.length;j++){
+                if(controlArray[i]==tempLetters[j]){
+                    controlArray[i]=0;
+                    tempLetters[j]=0;
                 }
             }
         }
-        //return false by default
-        return false;
+        //cycle through the player input control array, if not empty invalidate input
+        for(int i=0;i<controlArray.length;i++){
+            if(controlArray[i]!=0){
+				return isValid = false;
+            }
+        }
+        return isValid;
     }
     //scoring words
     public void scoreWords(FCWPlayer p){
@@ -111,6 +133,8 @@ public class FCWGame {
         }
     }
     //getters
-
+    public char[] getValidLetters(){
+        return validLetters;
+    }
 
 }
